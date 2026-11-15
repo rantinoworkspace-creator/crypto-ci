@@ -1,0 +1,54 @@
+name: Crypto-CI Assurance
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  cryptographic-assurance:
+    name: Quantum Readiness Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Crypto-CI Scanners
+        run: |
+          python -m pip install --upgrade pip
+          pip install pqblocks-scan ecdat
+
+      - name: Discovery - Generate CBOM & Scan Source
+        id: scan
+        run: |
+          pqblocks-scan . --cbom cbom.json --sarif scan.sarif --fail-on D || echo "SCAN_FAILED=true" >> $GITHUB_ENV
+          
+      - name: Scoring - Evaluate Risk
+        if: always()
+        run: |
+          ecdat scan . --format json > ecdat-risk.json || true
+          
+      - name: Policy Enforcement Gate
+        if: env.SCAN_FAILED == 'true'
+        run: |
+          echo "❌ CRYPTO-CI POLICY VIOLATION DETECTED."
+          echo "Critical quantum-vulnerable primitives were found in this codebase."
+          echo "Review the SARIF report in the GitHub Security tab."
+          echo "For a full Migration Roadmap, contact DealEngine."
+          exit 1
+
+      - name: Upload CBOM Artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Cryptographic-Bill-of-Materials
+          path: |
+            cbom.json
+            ecdat-risk.json
+            scan.sarif
