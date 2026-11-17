@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Crypto-CI Readiness Report</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #0b0f19; color: #e2e8f0; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        .data-grid { background-image: linear-gradient(#1e293b 1px, transparent 1px), linear-gradient(90deg, #1e293b 1px, transparent 1px); background-size: 40px 40px; }
+    </style>
+</head>
+<body class="min-h-screen data-grid p-8">
+    <div class="max-w-5xl mx-auto">
+        <header class="mb-10 border-b border-slate-800 pb-6">
+            <h1 class="text-3xl font-bold text-white tracking-tight"><span class="text-blue-500">⚡</span> Crypto-CI Readiness Report</h1>
+            <p class="text-slate-400 mt-2 font-mono">Target: {{ target_name }}</p>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            <div class="bg-slate-900 border border-slate-800 rounded-lg p-6">
+                <h2 class="text-sm text-slate-400 uppercase tracking-wider mb-2">Overall Score</h2>
+                <div class="text-4xl font-bold {% if score < 50 %}text-red-500{% else %}text-green-500{% endif %}">{{ score }}/100</div>
+            </div>
+            <div class="bg-slate-900 border border-slate-800 rounded-lg p-6">
+                <h2 class="text-sm text-slate-400 uppercase tracking-wider mb-2">Vulnerable Assets</h2>
+                <div class="text-4xl font-bold text-amber-500">{{ vulnerable_count }}</div>
+            </div>
+            <div class="bg-slate-900 border border-slate-800 rounded-lg p-6">
+                <h2 class="text-sm text-slate-400 uppercase tracking-wider mb-2">Safe Assets</h2>
+                <div class="text-4xl font-bold text-blue-500">{{ safe_count }}</div>
+            </div>
+        </div>
+
+        <h2 class="text-xl font-bold text-white mb-4">Cryptographic Bill of Materials (CBOM)</h2>
+        <div class="bg-slate-900 border border-slate-800 rounded-lg overflow-hidden">
+            <table class="w-full text-left">
+                <thead class="bg-slate-800">
+                    <tr>
+                        <th class="p-4 text-sm font-semibold text-slate-300">Asset Name</th>
+                        <th class="p-4 text-sm font-semibold text-slate-300">Algorithm</th>
+                        <th class="p-4 text-sm font-semibold text-slate-300">Primitive</th>
+                        <th class="p-4 text-sm font-semibold text-slate-300">Status</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-800">
+                    {% for asset in assets %}
+                    <tr class="hover:bg-slate-800/50 transition-colors">
+                        <td class="p-4 font-mono text-sm">{{ asset.name }}</td>
+                        <td class="p-4 font-mono text-sm">{{ asset.algorithm }}</td>
+                        <td class="p-4 font-mono text-sm text-slate-400">{{ asset.primitive }}</td>
+                        <td class="p-4">
+                            {% if asset.is_vulnerable %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-900/50 text-red-400 border border-red-800">Vulnerable</span>
+                            {% else %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-900/50 text-green-400 border border-green-800">Secure</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
